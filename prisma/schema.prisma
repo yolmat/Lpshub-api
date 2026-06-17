@@ -7,6 +7,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// Tabelas relacionadas ao Usuario
 model User {
   id       String  @id @default(uuid())
   name     String
@@ -16,4 +17,280 @@ model User {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+// Tabelas relacionadas a vendas
+model Sale {
+  id String @id @default(uuid())
+
+  saleId        String @unique
+  saleProcessId Int    @unique
+
+  processOpeningDate DateTime
+  contractSignedDate DateTime?
+
+  vgv Decimal
+
+  saleStatus     String
+  saleStatusId   Int
+  saleStatusDate DateTime
+
+  productTypeId Int?
+  productType   String?
+
+  product String?
+
+  productStreet       String?
+  productNumber       String?
+  productComplement   String?
+  productNeighborhood String?
+  productZipCode      String?
+  productCity         String?
+  productPostalCode   String?
+  productState        String?
+
+  division String?
+  unit     String?
+  typeUnit String?
+
+  createDate DateTime
+  changeDate DateTime
+
+  siavs        SaleSiav[]
+  participants SaleParticipant[]
+  payments     Payment[]
+  events       SaleEvent[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("sales")
+}
+
+model SaleSiav {
+  id String @id @default(uuid())
+
+  saleId String
+  sale   Sale   @relation(fields: [saleId], references: [id])
+
+  pv Int
+
+  @@map("sale_siav")
+}
+
+model Person {
+  id String @id @default(uuid())
+
+  externalId Int?
+  sapId      String
+
+  name     String?
+  nickname String?
+
+  personType  String?
+  personGroup String?
+
+  participants SaleParticipant[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("persons")
+}
+
+model SaleParticipant {
+  id String @id @default(uuid())
+
+  externalId Int
+  companyId  Int
+
+  participantTypeId Int
+  participantType   String
+
+  salePercentage Decimal @db.Decimal(18, 2)
+
+  saleId String
+  sale   Sale   @relation(fields: [saleId], references: [id])
+
+  personId String
+  person   Person @relation(fields: [personId], references: [id])
+
+  createDate DateTime
+  changeDate DateTime
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("sale_participants")
+}
+
+model Payment {
+  id String @id @default(uuid())
+
+  externalId Int
+
+  saleId String
+  sale   Sale   @relation(fields: [saleId], references: [id])
+
+  treasuryDate DateTime?
+
+  documentNumber    Int?
+  installmentNumber Int?
+
+  paymentType String?
+
+  paymentValue Decimal @db.Decimal(18, 2)
+
+  expirationDate DateTime?
+
+  active       Boolean
+  renegotiated Boolean
+
+  personResponsibleId Int?
+
+  beneficiaries PaymentBeneficiary[]
+
+  createDate DateTime
+  changeDate DateTime
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("payments")
+}
+
+model PaymentBeneficiary {
+  id String @id @default(uuid())
+
+  externalId Int
+
+  paymentId String
+  payment   Payment @relation(fields: [paymentId], references: [id])
+
+  companyId        Int
+  personExternalId Int
+
+  mainBeneficiary Boolean
+
+  beneficiaryValue Decimal @db.Decimal(18, 2)
+
+  paymentBeneficiaryTypeId Int
+  typeBeneficiaryPayment   String
+
+  serviceType String?
+
+  royalties         PaymentRoyalty[]
+  sapConfigurations PaymentSapConfiguration[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("payment_beneficiaries")
+}
+
+model PaymentRoyalty {
+  id String @id @default(uuid())
+
+  beneficiaryId String
+  beneficiary   PaymentBeneficiary @relation(fields: [beneficiaryId], references: [id])
+
+  personId  Int?
+  companyId Int?
+
+  beneficiaryType String?
+
+  beneficiaryValue Decimal @db.Decimal(18, 2)
+
+  @@map("payment_royalties")
+}
+
+model PaymentSapConfiguration {
+  id String @id @default(uuid())
+
+  beneficiaryId String
+  beneficiary   PaymentBeneficiary @relation(fields: [beneficiaryId], references: [id])
+
+  sapConfigurationType String
+  serviceType          String
+
+  configurationAcronym String
+
+  @@map("payment_sap_configurations")
+}
+
+model SaleEvent {
+  id String @id @default(uuid())
+
+  saleId String
+  sale   Sale   @relation(fields: [saleId], references: [id])
+
+  salesEventId Int
+  salesEvent   String
+
+  salesEventDate DateTime
+
+  @@map("sale_events")
+}
+
+// Tabelas de importação
+model FinancialImport {
+  id String @id @default(uuid())
+
+  totalItems Int
+
+  successItems Int @default(0)
+  failedItems  Int @default(0)
+
+  status ImportStatus
+
+  startedAt  DateTime  @default(now())
+  finishedAt DateTime?
+
+  items FinancialImportItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("financial_imports")
+}
+
+model FinancialImportItem {
+  id String @id @default(uuid())
+
+  importId String
+  import   FinancialImport @relation(fields: [importId], references: [id])
+
+  saleExternalId String
+
+  status ImportItemStatus
+
+  errorMessage String?
+
+  payload Json
+
+  startedAt  DateTime?
+  finishedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+  @@index([saleExternalId])
+  @@map("financial_import_items")
+}
+
+// Enums de importação
+
+enum ImportStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  COMPLETED_WITH_ERRORS
+}
+
+enum ImportItemStatus {
+  PENDING
+  PROCESSING
+  SUCCESS
+  FAILED
 }
