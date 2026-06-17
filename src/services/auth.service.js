@@ -1,4 +1,5 @@
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 
 const userRepository = require("../repositories/user.repository");
 
@@ -28,10 +29,26 @@ async function login(data) {
         );
     }
 
+    const token = jwt.sign(
+        {
+            sub: user.id,
+            email: user.email,
+            name: user.name,
+        },
+        process.env.JWT_SECRET,
+        {
+            expiresIn:
+                process.env.JWT_EXPIRES_IN || "1d",
+        }
+    );
+
     return {
-        id: user.id,
-        name: user.name,
-        email: user.email,
+        user: {
+            id: user.id,
+            name: user.name,
+            email: user.email,
+        },
+        token
     };
 }
 

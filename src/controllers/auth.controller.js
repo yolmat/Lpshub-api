@@ -10,13 +10,21 @@ async function login(req, res, next) {
 
         return res.status(200).json({
             success: true,
-            user,
+            ...user,
         });
     } catch (error) {
         next(error);
     }
 }
 
+async function me(req, res) {
+    return res.status(200).json({
+        success: true,
+        user: req.user,
+    });
+}
+
 module.exports = {
     login,
+    me,
 };
