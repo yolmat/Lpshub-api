@@ -1,11 +1,18 @@
 const service = require("../services/user.service");
 
-async function create(req, res) {
-    const user = await service.createUser(req.body);
+async function create(req, res, next) {
 
-    return res.status(201).json(user);
+    try {
+        const user = await service.createUser(
+            req.body
+        );
+
+        return res.status(201).json(user);
+    } catch (error) {
+        next(error);
+    }
 }
 
 module.exports = {
-    create,
-};
+    create
+}
