@@ -5,4 +5,6 @@ generated
 
 .env
 
+model.cs
+
 /generated/prisma
