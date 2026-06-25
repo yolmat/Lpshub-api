@@ -123,5 +123,5 @@ module.exports = {
     getNextPendingItem,
     markAsProcessing,
     markAsSuccess,
-    markAsFailed
+    markAsFailed,
 };

@@ -1,4 +1,6 @@
-const repository = require("../repositories/financial.repository");
+const prisma = require("../lib/prisma");
+const repository = require("../repositories/import.repository");
+const saleService = require("../services/sale.service");
 
 async function processNextItem() {
     const item = await repository.getNextPendingItem();
@@ -14,9 +16,12 @@ async function processNextItem() {
             `[FINANCIAL] Processing sale ${item.saleExternalId}`
         );
 
-        await repository.markAsSuccess(item.id);
-
-
+        await prisma.$transaction(async (tx) => {
+            await saleService.syncSale(
+                tx,
+                item.payload
+            );
+        });
 
         await repository.updateImportStatistics(
             item.importId
@@ -25,6 +30,8 @@ async function processNextItem() {
         console.log(
             `[FINANCIAL] Success ${item.saleExternalId}`
         );
+
+        await repository.markAsSuccess(item.id);
 
     } catch (error) {
 

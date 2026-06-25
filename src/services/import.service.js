@@ -1,4 +1,4 @@
-const repository = require("../repositories/financial.repository");
+const repository = require("../repositories/import.repository");
 
 async function enqueueImport(sales) {
     const importBatch = await repository.createImport(
@@ -14,5 +14,5 @@ async function enqueueImport(sales) {
 }
 
 module.exports = {
-    enqueueImport
+    enqueueImport,
 };

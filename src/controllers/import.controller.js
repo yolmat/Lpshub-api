@@ -1,8 +1,8 @@
 const {
     financialImportSchema
-} = require("../validations/financial.schema");
+} = require("../validations/import.schema");
 
-const financialService = require("../services/financial.service");
+const financialService = require("../services/import.service");
 
 async function importSales(req, res, next) {
     try {

@@ -2,7 +2,7 @@ const express = require("express");
 
 const {
     importSales
-} = require("../controllers/financial.controller");
+} = require("../controllers/import.controller");
 
 const authMiddleware = require("../middlewares/auth.middleware");
 

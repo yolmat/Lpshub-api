@@ -4,7 +4,7 @@ const helmet = require("helmet");
 
 const userRoutes = require("./routes/user.routes");
 const authRoutes = require("./routes/auth.routes");
-const financialRoutes = require("./routes/financial.routes")
+const importRoutes = require("./routes/import.routes")
 const errorMiddleware = require("./middlewares/error.middleware");
 const authMiddleware = require("./middlewares/auth.middleware");
 
@@ -24,7 +24,7 @@ app.use(authMiddleware);
 app.use("/users", userRoutes);
 
 // Import
-app.use("/financial", financialRoutes);
+app.use("/sales", importRoutes);
 
 // Validador de erros
 app.use(errorMiddleware);
