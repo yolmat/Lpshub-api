@@ -1,6 +1,8 @@
 const prisma = require("../lib/prisma");
 const repository = require("../repositories/import.repository");
 const saleService = require("../services/sale.service");
+const personService = require("../services/person.service");
+const participantService = require("../services/participant.service");
 
 async function processNextItem() {
     const item = await repository.getNextPendingItem();
@@ -17,10 +19,23 @@ async function processNextItem() {
         );
 
         await prisma.$transaction(async (tx) => {
-            await saleService.syncSale(
+            const sale =
+                await saleService.syncSale(
+                    tx,
+                    item.payload
+                );
+
+            await personService.syncPersons(
                 tx,
                 item.payload
             );
+
+            await participantService
+                .syncParticipants(
+                    tx,
+                    sale,
+                    item.payload
+                );
         });
 
         await repository.updateImportStatistics(
