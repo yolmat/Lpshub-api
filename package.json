@@ -10,7 +10,7 @@
     "prisma:migrate": "prisma migrate dev",
     "prisma:generate": "prisma generate",
     "prisma:studio": "prisma studio",
-    "worker:financial": "node src/workers/financial.worker.js"
+    "worker:sales": "node src/workers/sales.worker.js"
   },
   "keywords": [],
   "author": "",

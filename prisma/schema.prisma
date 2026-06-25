@@ -81,8 +81,8 @@ model SaleSiav {
 model Person {
   id String @id @default(uuid())
 
-  externalId Int?
-  sapId      String
+  externalId Int?    @unique
+  sapId      String?
 
   name     String?
   nickname String?
@@ -91,6 +91,10 @@ model Person {
   personGroup String?
 
   participants SaleParticipant[]
+
+  documents PersonDocument[]
+
+  beneficiaries PaymentBeneficiary[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -101,7 +105,7 @@ model Person {
 model SaleParticipant {
   id String @id @default(uuid())
 
-  externalId Int
+  externalId Int @unique
   companyId  Int
 
   participantTypeId Int
@@ -127,7 +131,7 @@ model SaleParticipant {
 model Payment {
   id String @id @default(uuid())
 
-  externalId Int
+  externalId Int @unique
 
   saleId String
   sale   Sale   @relation(fields: [saleId], references: [id])
@@ -162,13 +166,15 @@ model Payment {
 model PaymentBeneficiary {
   id String @id @default(uuid())
 
-  externalId Int
+  externalId Int @unique
 
   paymentId String
   payment   Payment @relation(fields: [paymentId], references: [id])
 
-  companyId        Int
-  personExternalId Int
+  companyId Int
+
+  personId String?
+  person   Person? @relation(fields: [personId], references: [id])
 
   mainBeneficiary Boolean
 
@@ -277,6 +283,22 @@ model FinancialImportItem {
   @@index([status])
   @@index([saleExternalId])
   @@map("financial_import_items")
+}
+
+model PersonDocument {
+  id String @id @default(uuid())
+
+  personId String
+  person   Person @relation(fields: [personId], references: [id])
+
+  type  String
+  value String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([personId, type, value])
+  @@map("person_documents")
 }
 
 // Enums de importação
